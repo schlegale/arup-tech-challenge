@@ -1,92 +1,33 @@
 import React from "react";
-import { StatusBar } from "expo-status-bar";
-import {
-  StyleSheet,
-  Text,
-  View,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { NavigationContainer } from "@react-navigation/native";
+import Home from "./pages/Home";
+import IssueAdd from "./pages/IssueAdd";
+import IssueDetail from "./pages/IssueDetail";
 
-const issues = [
-  { id: 1, issueName: "Leaky faucet" },
-  { id: 2, issueName: "Broken window" },
-];
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.navBar}>
-        <Text style={styles.navTitle}>Inspectable</Text>
-      </View>
-      <ScrollView style={styles.issuesList}>
-        {issues.map((issue) => (
-          <TouchableOpacity key={issue.id}>
-            <View style={styles.issueItem}>
-              <Text style={styles.issueText}>
-                ID: {issue.id} - {issue.issueName}
-              </Text>
-              <Text style={styles.issueAction}>{">"}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-      <TouchableOpacity style={styles.addButton}>
-        <Text style={styles.addButtonText}>Add Issue</Text>
-      </TouchableOpacity>
-      <StatusBar style="auto" />
-    </SafeAreaView>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Main">
+        <Stack.Screen
+          name="Main"
+          component={Home}
+          options={{ title: "Issues List" }}
+        />
+        <Stack.Screen
+          name="IssueDetail"
+          component={IssueDetail}
+          options={{ title: "Issue Detail" }}
+        />
+
+        <Stack.Screen
+          name="IssueAdd"
+          component={IssueAdd}
+          options={{ title: "Add New Issue" }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  navBar: {
-    height: 60,
-    width: "100%",
-    backgroundColor: "#007AFF",
-    justifyContent: "center",
-    alignItems: "center",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
-  },
-  navTitle: {
-    color: "#ffffff",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  issuesList: {
-    flex: 1,
-    width: "100%",
-  },
-  issueItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
-  },
-  issueText: {
-    fontSize: 16,
-  },
-  issueAction: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  addButton: {
-    backgroundColor: "#007AFF",
-    padding: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  addButtonText: {
-    color: "#ffffff",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-});
