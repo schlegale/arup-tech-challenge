@@ -87,10 +87,6 @@ function IssueAdd() {
       formData.append("files", file);
     });
 
-    {
-      console.log("ihandleSubmit: ", formData);
-    }
-
     try {
       const response = await axios.post(
         CONSTANTS.API_ENDPOINTS.ISSUES,
