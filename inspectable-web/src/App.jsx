@@ -15,10 +15,11 @@ import {
   ModalOverlay,
   ModalContent,
   ModalHeader,
-  ModalFooter,
   ModalBody,
   ModalCloseButton,
-  Button,
+  VStack,
+  Text,
+  Image,
 } from "@chakra-ui/react";
 import { ChevronRightIcon } from "@chakra-ui/icons";
 import axios from "axios";
@@ -26,17 +27,17 @@ import { CONSTANTS } from "../constants";
 
 function getStatusColor(issueType) {
   switch (issueType) {
-    case "Critical issue":
-      return "red.500";
-    case "Moderate issue":
-      return "orange.500";
+    case "Critical":
+      return "#E53E3E";
+    case "Moderate":
+      return "#DD6B20";
     case "Observation":
-    case "Good practice":
-      return "yellow.500";
-    case "Minor issue":
-      return "green.500";
+    case "Good":
+      return "#D69E2E";
+    case "Minor":
+      return "#38A169";
     default:
-      return "gray.500";
+      return "#718096";
   }
 }
 
@@ -62,6 +63,19 @@ function App() {
     setCurrentIssue(issue);
     onOpen();
   }
+
+  const renderImages = (files) => {
+    return files.map((file, index) => (
+      <Image
+        key={index}
+        src={`${CONSTANTS.API_ENDPOINTS.GET_FILE}${file.uri}`}
+        alt={`Attachment ${index + 1}`}
+        boxSize="100px"
+        objectFit="contain"
+        m={2}
+      />
+    ));
+  };
 
   return (
     <Box width="100vw" overflowX="auto" display="flex" justifyContent="center">
@@ -94,13 +108,12 @@ function App() {
               <Td>
                 <Flex alignItems="center">
                   <Box
-                    width={3}
-                    height={3}
-                    borderRadius="full"
-                    bg={getStatusColor(issue.type)}
+                    width={23}
+                    height={23}
+                    borderRadius={"100%"}
+                    style={{ backgroundColor: getStatusColor(issue.type) }}
                     mr={2}
                   />
-                  {issue.type}
                   <Spacer />
                   <Icon as={ChevronRightIcon} />
                 </Flex>
@@ -111,28 +124,93 @@ function App() {
       </Table>
 
       {/* Modal for displaying the issue details remains unchanged */}
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+      <Modal isOpen={isOpen} onClose={onClose} size="xl" isCentered>
         <ModalOverlay />
-        <ModalContent bg="white" mx="auto" width="auto" maxWidth="80vw">
-          <ModalHeader>Issue Details</ModalHeader>
-          <ModalCloseButton />
+        <ModalContent
+          mx="auto"
+          width="auto"
+          height="80vh"
+          backgroundColor="#fff"
+          p={30}
+          px={50}
+          marginTop={20}
+          borderRadius={10}
+          position="relative"
+        >
+          <ModalHeader marginBottom={30}>Issue Details</ModalHeader>
+          <ModalCloseButton
+            position="absolute"
+            right="8px"
+            top="10px"
+            background={"transparent"}
+            border={"none"}
+          />
           <ModalBody>
             {currentIssue && (
-              <Box>
-                <p>Reference: {currentIssue.ref}</p>
-                <p>Title: {currentIssue.title}</p>
-                <p>Floor: {currentIssue.floor}</p>
-                <p>Area: {currentIssue.area}</p>
-                <p>Discipline: {currentIssue.discipline}</p>
-                <p>Type: {currentIssue.type}</p>
-              </Box>
+              <VStack spacing={0} align="start">
+                <Text fontWeight="bold" m={0} p={0}>
+                  Issue Name
+                </Text>
+                <Text m={0} p={0}>
+                  {currentIssue.title}
+                </Text>
+
+                <Text fontWeight="bold" m={0} p={0}>
+                  Issue ID
+                </Text>
+                <Text m={0} p={0}>
+                  {currentIssue.id}
+                </Text>
+
+                <Text fontWeight="bold" m={0} p={0}>
+                  Location
+                </Text>
+                <Text m={0} p={0}>
+                  Floor: {currentIssue.floor} - Area: {currentIssue.area}
+                </Text>
+
+                <Text fontWeight="bold" m={0} p={0}>
+                  Discipline
+                </Text>
+                <Text m={0} p={0}>
+                  {currentIssue.discipline}
+                </Text>
+
+                <Text fontWeight="bold" m={0} p={0}>
+                  Issue Type
+                </Text>
+                <Text m={0} p={0}>
+                  {currentIssue.type}
+                </Text>
+
+                <Text fontWeight="bold" m={0} p={0}>
+                  Description
+                </Text>
+                {currentIssue.description ? (
+                  <Text fontStyle="italic" m={0} p={0}>
+                    {currentIssue.description}
+                  </Text>
+                ) : (
+                  <Text m={0} p={0}>
+                    No description provided.
+                  </Text>
+                )}
+
+                <Text fontWeight="bold" m={0} p={0}>
+                  Attachments
+                </Text>
+                <Flex wrap="wrap">
+                  {currentIssue.files && currentIssue.files.length > 0 ? (
+                    renderImages(currentIssue.files)
+                  ) : (
+                    <Text m={0} p={0}>
+                      No images available
+                    </Text>
+                  )}
+                </Flex>
+              </VStack>
             )}
           </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onClose}>
-              Close
-            </Button>
-          </ModalFooter>
         </ModalContent>
       </Modal>
     </Box>

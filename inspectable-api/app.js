@@ -29,6 +29,12 @@ app.use(
   })
 );
 
+const fileSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  type: { type: String, required: true },
+  uri: { type: String, required: true },
+});
+
 const IssueSchema = new mongoose.Schema({
   id: String,
   title: String,
@@ -36,13 +42,7 @@ const IssueSchema = new mongoose.Schema({
   area: String,
   discipline: String,
   type: String,
-  files: [
-    {
-      name: String,
-      type: String,
-      uri: String,
-    },
-  ],
+  files: { type: [fileSchema], default: [] },
 });
 
 const Issue = mongoose.model("Issue", IssueSchema);
@@ -63,24 +63,27 @@ app.get("/issues", async (req, res) => {
 
 app.post("/issues", async (req, res) => {
   const { id, title, floor, area, discipline, type } = req.body;
-  let attachments = [];
-
-  console.log("/issues: ", req.files);
+  let files = [];
 
   if (req.files) {
-    const filePromises = Object.keys(req.files).map((key) => {
-      const file = req.files[key];
-      const filePath = path.join(uploadDir, file.name);
+    let uploadedFiles = req.files.files;
+    if (!Array.isArray(uploadedFiles)) {
+      uploadedFiles = [uploadedFiles];
+    }
+
+    const filePromises = uploadedFiles.map((file, index) => {
+      const newFileName = `${id}.${index}.jpg`;
+      const filePath = path.join(uploadDir, newFileName);
 
       return file.mv(filePath).then(() => {
-        attachments.push({
-          filename: file.name,
-          path: filePath.replace(__dirname, ""),
+        files.push({
+          name: file.name,
+          type: file.mimetype,
+          uri: `/uploads/${newFileName}`,
         });
       });
     });
 
-    // Wait for all file upload promises to resolve
     try {
       await Promise.all(filePromises);
     } catch (err) {
@@ -97,7 +100,7 @@ app.post("/issues", async (req, res) => {
       area,
       discipline,
       type,
-      attachments,
+      files,
     });
 
     await newIssue.save();
@@ -105,6 +108,17 @@ app.post("/issues", async (req, res) => {
   } catch (err) {
     console.error("Error saving the issue:", err);
     res.status(500).send("Error saving the issue.");
+  }
+});
+
+app.get("/uploads/:filename", (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(uploadDir, filename);
+
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).send("File not found");
   }
 });
 

@@ -4,5 +4,6 @@ export const CONSTANTS = {
   API_ENDPOINTS: {
     ISSUES: `${API_HOST}/issues`,
     NEXT_ISSUE_ID: `${API_HOST}/next-issue-id`,
+    GET_FILE: `${API_HOST}`,
   },
 };
